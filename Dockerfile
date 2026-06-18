@@ -1,13 +1,7 @@
 FROM php:8.2-cli
 
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip
+    git curl zip unzip libpng-dev libonig-dev libxml2-dev
 
 RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
 
@@ -19,9 +13,11 @@ COPY . .
 
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
-# 🔥 CLAVE PARA EVITAR ERROR 500
-RUN cp .env.example .env || true
-RUN php artisan key:generate
+# limpiar cache Laravel (CLAVE)
+RUN php artisan config:clear
+RUN php artisan cache:clear
+RUN php artisan route:clear
+RUN php artisan view:clear
 
 RUN chmod -R 777 storage bootstrap/cache
 
